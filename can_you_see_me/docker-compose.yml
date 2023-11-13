@@ -1,0 +1,9 @@
+version: '1'
+services:
+  can_you_see_me:
+    image: can_you_see_me
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 3003:80

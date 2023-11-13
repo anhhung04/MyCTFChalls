@@ -1,0 +1,1 @@
+My friend provided me with an example of a static web template suitable for a blog. Can you exploit this? (PS: Please have a working exploit locally before destroying the remote 🙏)

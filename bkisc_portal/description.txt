@@ -1,0 +1,1 @@
+Our club has a portal for managing club members. I sent it to my friend, but I'm unsure why he can't access the restricted areas on my website. (PS: Please have a working exploit locally before destroying the remote 🙏)

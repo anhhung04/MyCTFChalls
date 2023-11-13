@@ -1,0 +1,27 @@
+#! /usr/bin/env node
+
+const { app , db, redisClient} = require("../src");
+require('dotenv').config();
+
+
+const port = process.env.PORT || '3000';
+
+(async function () {
+    try {
+        console.log('[+] Connecting to redis')
+        await redisClient.connect();
+        console.log('[+] Connectinng to database')
+        await db.connect();
+        console.log('[+] Migrating database')
+        await db.migrate();
+        setInterval(async ()=>{
+            await db.createNewSession()    
+        }, 5*60*1000);
+        app.listen(port, ()=>{
+            console.log('[+] Server listening on port ' + port);
+        });
+    } catch (err) {
+        process.exit(1);
+    }
+})();
+

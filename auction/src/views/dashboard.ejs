@@ -1,0 +1,122 @@
+<%- include('header'); -%>
+
+<div class="container">
+    <div class="container">
+        <h1 class="mt-4">Auction Room</h1>
+        
+        <div class="chat-box mt-4">
+            <!-- Chat messages will be displayed here -->
+            <div id="messages" class="container">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        Current Session with max bid: <a id="max_bid"><%= current_price || 0 %></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <h6>Current bid:</h6>
+            <h6 id="current_bid"><%= user?.bid %></h6>
+        </div>
+        
+        <form action="/auction" id="auction">
+            <div class="input-group mt-4">
+                <input
+                    type="number"
+                    id="money"
+                    name="money"
+                    class="form-control"
+                    placeholder="Enter your bid..."
+                />
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary">Bid</button>
+                </div>
+            </div>
+        </form>
+        
+        <form id="chatForm" class="mt-4">
+            <div class="input-group">
+                <input
+                    type="text"
+                    id="message"
+                    class="form-control"
+                    placeholder="Type your message..."
+                />
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+</div>
+
+<script>
+
+    let user = "<%= user?.username || 'anonymous' %>";
+
+    const ws = new WebSocket("ws://"+window.location.host+"/");
+    ws.addEventListener("open", function() {
+        console.log("Connected to the chat server.");
+    })
+
+    ws.addEventListener("message", function(e){
+        const messageBox = document.getElementById("messages");
+        const data = JSON.parse(e.data);
+        messageBox.innerHTML += `
+        <div class="card-body">
+            <div class="message">
+                <strong>${data.user}</strong>: ${data.message}
+            </div>
+        </div>
+        ` + "<br>";
+    })
+
+    ws.onerror = function(e){
+        console.log(e);
+    }
+
+    document.forms.chatForm.onsubmit = function(event){
+        const input = document.getElementById("message");
+        const message = input.value;
+        ws.send(JSON.stringify({user, message}));
+        input.value = "";
+        event.preventDefault();
+        return false;
+    }
+
+    document.forms.auction.onsubmit = function(e){
+        const input = document.getElementById("money");
+        const currentBid = document.getElementById("current_bid");
+        fetch('/auction', {
+            method: 'GET',
+            credentials: 'include'
+        }).then(res => res.json()).then(confirmJson => {
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/auction");
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xhr.setRequestHeader("X-Confirm-Token", confirmJson.confirmToken);
+            xhr.withCredentials = true;
+            xhr.send(JSON.stringify({add_value: input.value || 0}));
+            xhr.onload = function(){
+                if (xhr.status != 200){
+                    alert(JSON.parse(xhr.responseText).message);
+                } else {
+                    let resJ =  JSON.parse(xhr.responseText);
+                    currentBid.textContent = resJ.bid;
+                    if(resJ.max){
+                        ws.send(JSON.stringify({user: "Admin", message: `${user} is currently the one with the highest price: ${resJ.bid}`}));
+                    }
+                    ws.send(JSON.stringify({user, message: "I bid $" + currentBid.textContent}));
+                }
+            }
+            input.value = "";
+            e.preventDefault();
+        });
+        return false;
+    }
+    
+</script>
+
+<%- include('footer'); -%>

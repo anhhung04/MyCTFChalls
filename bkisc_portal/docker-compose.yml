@@ -1,0 +1,13 @@
+version: '3.4'
+
+services:
+  app:
+    image: bkisc_portal
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      - FLAG=BKISC{You_got_me}
+    ports:
+      - "3001:80"
+    restart: always

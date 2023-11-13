@@ -1,0 +1,15 @@
+version: '1.0'
+services:
+  redis_cache:
+    image: redis
+    ports:
+      - "6379:6379"
+  bkisc_chall_race:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - REDIS_URL=redis://redis_cache:6379
+    ports:
+      - "3002:3000"

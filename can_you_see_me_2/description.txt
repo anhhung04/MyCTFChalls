@@ -1,0 +1,1 @@
+Upon receiving reports from participants regarding an issue with the app's assert function, I removed the function to enhance security measures. Please assist me in evaluating this decision.
